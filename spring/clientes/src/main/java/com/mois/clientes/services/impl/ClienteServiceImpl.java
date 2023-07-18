@@ -23,8 +23,8 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
-    public void save(Cliente cliente) {
-        clienteDao.save(cliente);
+    public Cliente save(Cliente cliente) {
+       return clienteDao.save(cliente);
     }
 
     @Override
@@ -35,8 +35,8 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional
-    public void delete(Cliente cliente) {
-        clienteDao.delete(cliente);
+    public void delete(Long id) {
+        clienteDao.deleteById(id);
 
     }
 }
