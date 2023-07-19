@@ -10,43 +10,56 @@ import swal from 'sweetalert2'
 })
 export class FormComponent implements OnInit {
 
-  public cliente: Cliente = new Cliente()
-  public titulo:string = "Crear Cliente"
+  public cliente: Cliente = new Cliente();
+  titulo: string = "Crear Cliente";
+
+  errores: string[];
 
   constructor(private clienteService: ClienteService,
-  private router: Router,
-private activatedRoute: ActivatedRoute) { }
+    private router: Router,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
-    this.cargarCliente()
+    this.cargarCliente();
   }
 
-  cargarCliente(): void{
+  cargarCliente(): void {
     this.activatedRoute.params.subscribe(params => {
-      let id = params['id']
-      if(id){
-        this.clienteService.getCliente(id).subscribe( (cliente) => this.cliente = cliente)
+      let id = params['id'];
+      if (id) {
+        this.clienteService.getCliente(id).subscribe((cliente) => this.cliente = cliente);
       }
     })
   }
 
   create(): void {
     this.clienteService.create(this.cliente)
-      .subscribe(cliente => {
-        this.router.navigate(['/clientes'])
-        swal.fire('Nuevo cliente', `Cliente ${cliente.nombre} creado con éxito!`, 'success')
-      }
+      .subscribe(
+        cliente => {
+          this.router.navigate(['/clientes']);
+          swal.fire('Nuevo cliente', `El cliente ${cliente.nombre} ha sido creado con éxito`, 'success');
+        },
+        err => {
+          this.errores = err.error.errors as string[];
+          console.error('Código del error desde el backend: ' + err.status);
+          console.error(err.error.errors);
+        }
       );
   }
 
-  update():void{
+  update(): void {
     this.clienteService.update(this.cliente)
-    .subscribe( cliente => {
-      this.router.navigate(['/clientes'])
-      swal.fire('Cliente Actualizado', `Cliente ${cliente.nombre} actualizado con éxito!`, 'success')
-    }
-
-    )
+      .subscribe(
+        json => {
+          this.router.navigate(['/clientes']);
+          swal.fire('Cliente Actualizado', `${json.mensaje}: ${json.cliente.nombre}`, 'success');
+        },
+        err => {
+          this.errores = err.error.errors as string[];
+          console.error('Código del error desde el backend: ' + err.status);
+          console.error(err.error.errors);
+        }
+      )
   }
 
 }
