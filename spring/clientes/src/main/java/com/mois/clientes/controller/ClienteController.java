@@ -2,17 +2,25 @@ package com.mois.clientes.controller;
 
 import com.mois.clientes.entities.Cliente;
 import com.mois.clientes.services.ClienteService;
+import com.mois.clientes.services.UploadService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +33,11 @@ import java.util.stream.Collectors;
 public class ClienteController {
     @Autowired
     private ClienteService clienteService;
+
+    @Autowired
+    private UploadService uploadService;
+
+     private final Logger log = LoggerFactory.getLogger(ClienteController.class);
 
     @GetMapping("/clientes")
     public List<Cliente> index() {
@@ -43,23 +56,25 @@ public class ClienteController {
         Cliente cliente = null;
         Map<String, Object> response = new HashMap<>();
 
-        try{
+        try {
             cliente = clienteService.findById(id);
-        }catch (DataAccessException e){
-            response.put("mensaje","Error al realizar la consulta a la base de datos");
-            response.put("error",e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity< Map<String, Object>>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch(DataAccessException e) {
+            response.put("mensaje", "Error al realizar la consulta en la base de datos");
+            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(cliente ==null){
-            response.put("mensaje","El cliente ID: ".concat(id.toString().concat( "no existe en la base de datos")));
-            return new ResponseEntity< Map<String, Object>>(response,HttpStatus.NOT_FOUND);
+
+        if(cliente == null) {
+            response.put("mensaje", "El cliente ID: ".concat(id.toString().concat(" no existe en la base de datos!")));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<Cliente>(cliente,HttpStatus.OK);
+
+        return new ResponseEntity<Cliente>(cliente, HttpStatus.OK);
     }
 
     @PostMapping("/clientes")
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente, BindingResult result) {
+
         Cliente clienteNew = null;
         Map<String, Object> response = new HashMap<>();
 
@@ -88,8 +103,8 @@ public class ClienteController {
     }
 
     @PutMapping("/clientes/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> update(@Valid @RequestBody Cliente cliente, BindingResult result, @PathVariable Long id) {
+
         Cliente clienteActual = clienteService.findById(id);
 
         Cliente clienteUpdated = null;
@@ -135,11 +150,16 @@ public class ClienteController {
     }
 
     @DeleteMapping("/clientes/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<?> delete(@PathVariable Long id) {
+
         Map<String, Object> response = new HashMap<>();
 
         try {
+            Cliente cliente = clienteService.findById(id);
+            String nombreFotoAnterior = cliente.getFoto();
+
+            uploadService.eliminar(nombreFotoAnterior);
+
             clienteService.delete(id);
         } catch (DataAccessException e) {
             response.put("mensaje", "Error al eliminar el cliente de la base de datos");
@@ -150,5 +170,55 @@ public class ClienteController {
         response.put("mensaje", "El cliente eliminado con éxito!");
 
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/clientes/upload")
+    public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id){
+        Map<String, Object> response = new HashMap<>();
+
+        Cliente cliente = clienteService.findById(id);
+
+        if(!archivo.isEmpty()) {
+
+            String nombreArchivo = null;
+            try {
+                nombreArchivo = uploadService.copiar(archivo);
+            } catch (Exception e) {
+                response.put("mensaje", "Error al subir la imagen del cliente");
+                response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            String nombreFotoAnterior = cliente.getFoto();
+
+            uploadService.eliminar(nombreFotoAnterior);
+
+            cliente.setFoto(nombreArchivo);
+
+            clienteService.save(cliente);
+
+            response.put("cliente", cliente);
+            response.put("mensaje", "Has subido correctamente la imagen: " + nombreArchivo);
+
+        }
+
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/uploads/img/{nombreFoto:.+}")
+    public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
+
+        Resource recurso = null;
+
+        try {
+            recurso = uploadService.cargar(nombreFoto);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        HttpHeaders cabecera = new HttpHeaders();
+        cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
+
+        return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
     }
 }

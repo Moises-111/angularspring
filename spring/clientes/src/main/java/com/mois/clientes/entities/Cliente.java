@@ -3,6 +3,7 @@ package com.mois.clientes.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
@@ -29,13 +30,24 @@ public class Cliente implements Serializable {
     @Column(nullable=false, unique=true)
     private String email;
 
+    @NotNull(message ="no puede estar vacio")
     @Column(name="create_at")
     @Temporal(TemporalType.DATE)
     private Date createAt;
 
-    @PrePersist
+    private String foto;
+
+   /* @PrePersist
     public void prePersist() {
         createAt = new Date();
+    }*/
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 
     public Long getId() {
