@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
-import { DatePipe } from '@angular/common';
+//import { DatePipe, formatDate } from '@angular/common';
 import { Cliente } from './cliente';
-import { Observable ,throwError } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map ,catchError, tap} from 'rxjs/operators';
-import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders, HttpRequest, HttpEvent } from '@angular/common/http';
+import { map, catchError, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
 import swal from 'sweetalert2';
+
+import { Router } from '@angular/router';
 
 @Injectable()
 export class ClienteService {
   private urlEndPoint: string = 'http://localhost:8080/api/clientes';
 
-  private httpHeaders = new HttpHeaders({'Content-Type': 'application/json'})
+  private httpHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -23,9 +24,9 @@ export class ClienteService {
       }),
       map((response: any) => {
         (response.content as Cliente[]).map(cliente => {
-          //cliente.nombre = cliente.nombre.toUpperCase();
-          let datePipe = new DatePipe('es');
-          cliente.createAt = datePipe.transform(cliente.createAt, 'EEEE dd, MMMM yyyy');
+          cliente.nombre = cliente.nombre.toUpperCase();
+          //let datePipe = new DatePipe('es');
+          //cliente.createAt = datePipe.transform(cliente.createAt, 'EEEE dd, MMMM yyyy');
           //cliente.createAt = formatDate(cliente.createAt, 'dd-MM-yyyy', 'es');
           return cliente;
         });
@@ -39,19 +40,20 @@ export class ClienteService {
   }
 
   create(cliente: Cliente): Observable<Cliente> {
-    return this.http.post(this.urlEndPoint, cliente, { headers: this.httpHeaders }).pipe(
-      map((response: any) => response.cliente as Cliente),
-      catchError(e => {
+    return this.http.post(this.urlEndPoint, cliente, { headers: this.httpHeaders })
+      .pipe(
+        map((response: any) => response.cliente as Cliente),
+        catchError(e => {
 
-        if (e.status == 400) {
+          if (e.status == 400) {
+            return throwError(e);
+          }
+
+          console.error(e.error.mensaje);
+          swal.fire(e.error.mensaje, e.error.error, 'error');
           return throwError(e);
-        }
-
-        console.error(e.error.mensaje);
-        swal.fire(e.error.mensaje, e.error.error, 'error');
-        return throwError(e);
-      })
-    );
+        })
+      );
   }
 
   getCliente(id): Observable<Cliente> {
@@ -88,6 +90,20 @@ export class ClienteService {
         return throwError(e);
       })
     );
+  }
+
+  subirFoto(archivo: File, id): Observable<HttpEvent<{}>> {
+
+    let formData = new FormData();
+    formData.append("archivo", archivo);
+    formData.append("id", id);
+
+    const req = new HttpRequest('POST', `${this.urlEndPoint}/upload`, formData, {
+      reportProgress: true
+    });
+
+    return this.http.request(req);
+
   }
 
 }
