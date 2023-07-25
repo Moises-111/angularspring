@@ -1,6 +1,7 @@
 package com.mois.clientes.services;
 
 import com.mois.clientes.entities.Cliente;
+import com.mois.clientes.entities.Region;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,4 +16,5 @@ public interface ClienteService {
     public Cliente findById(Long id);
 
     public void delete(Long id);
+    public List<Region> findAllRegiones();
 }

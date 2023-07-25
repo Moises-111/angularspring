@@ -1,7 +1,16 @@
 /* Populate tabla clientes */
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Juan', 'Manuel', 'juan.manuel@miemail.com', '2020-01-02');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Pedro', 'Avilez', 'pedro.avilez@miemail.com', '2021-01-03');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Ezequiel', 'Martinez', 'ezequiel.martinez@miemai.com', '2022-01-04');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Moisés', 'Garnica', 'moises.garnica@miemail.com', '2023-02-01');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Ricardo', 'Lopez', 'ricardo.lopez@miemail.com', '2023-02-10');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES('Luis', 'Rodriguez', 'luis.rodriguez@miemail.com', '2023-02-18');
+INSERT INTO regiones (id, nombre) VALUES (1, 'Sudamérica');
+INSERT INTO regiones (id, nombre) VALUES (2, 'Centroamérica');
+INSERT INTO regiones (id, nombre) VALUES (3, 'Norteamérica');
+INSERT INTO regiones (id, nombre) VALUES (4, 'Europa');
+INSERT INTO regiones (id, nombre) VALUES (5, 'Asia');
+INSERT INTO regiones (id, nombre) VALUES (6, 'Africa');
+INSERT INTO regiones (id, nombre) VALUES (7, 'Oceanía');
+INSERT INTO regiones (id, nombre) VALUES (8, 'Antártida');
+
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(1,'Juan', 'Manuel', 'juan.manuel@miemail.com', '2020-01-02');
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(2,'Pedro', 'Avilez', 'pedro.avilez@miemail.com', '2021-01-03');
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(3,'Ezequiel', 'Martinez', 'ezequiel.martinez@miemai.com', '2022-01-04');
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(4,'Moisés', 'Garnica', 'moises.garnica@miemail.com', '2023-02-01');
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(5,'Ricardo', 'Lopez', 'ricardo.lopez@miemail.com', '2023-02-10');
+INSERT INTO clientes (region_id,nombre, apellido, email, create_at) VALUES(6,'Luis', 'Rodriguez', 'luis.rodriguez@miemail.com', '2023-02-18');

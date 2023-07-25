@@ -1,5 +1,6 @@
 package com.mois.clientes.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -37,6 +38,11 @@ public class Cliente implements Serializable {
 
     private String foto;
 
+    @NotNull(message="la región no puede ser vacia")
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="region_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Region region;
    /* @PrePersist
     public void prePersist() {
         createAt = new Date();
@@ -88,6 +94,14 @@ public class Cliente implements Serializable {
 
     public void setCreateAt(Date createAt) {
         this.createAt = createAt;
+    }
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
     }
 
     private static final long serialVersionUID = 1L;

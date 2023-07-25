@@ -1,6 +1,7 @@
 package com.mois.clientes.controller;
 
 import com.mois.clientes.entities.Cliente;
+import com.mois.clientes.entities.Region;
 import com.mois.clientes.services.ClienteService;
 import com.mois.clientes.services.UploadService;
 import jakarta.validation.Valid;
@@ -134,6 +135,7 @@ public class ClienteController {
             clienteActual.setNombre(cliente.getNombre());
             clienteActual.setEmail(cliente.getEmail());
             clienteActual.setCreateAt(cliente.getCreateAt());
+            clienteActual.setRegion(cliente.getRegion());
 
             clienteUpdated = clienteService.save(clienteActual);
 
@@ -220,5 +222,10 @@ public class ClienteController {
         cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
 
         return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
+    }
+
+    @GetMapping("/clientes/regiones")
+    public List<Region> listarRegiones(){
+        return clienteService.findAllRegiones();
     }
 }

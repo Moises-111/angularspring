@@ -1,6 +1,7 @@
 package com.mois.clientes.services.impl;
 
 import com.mois.clientes.entities.Cliente;
+import com.mois.clientes.entities.Region;
 import com.mois.clientes.repositories.ClienteRepository;
 import com.mois.clientes.services.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,10 @@ public class ClienteServiceImpl implements ClienteService {
     public void delete(Long id) {
         clienteDao.deleteById(id);
 
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Region> findAllRegiones() {
+        return clienteDao.findAllRegiones();
     }
 }
