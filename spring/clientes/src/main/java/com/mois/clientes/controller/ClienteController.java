@@ -4,7 +4,6 @@ import com.mois.clientes.entities.Cliente;
 import com.mois.clientes.entities.Region;
 import com.mois.clientes.services.ClienteService;
 import com.mois.clientes.services.UploadService;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -51,6 +52,7 @@ public class ClienteController {
         return clienteService.findAll(pageable);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping("/clientes/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
 
@@ -73,6 +75,7 @@ public class ClienteController {
         return new ResponseEntity<Cliente>(cliente, HttpStatus.OK);
     }
 
+    @Secured("ROLE_ADMIN")
     @PostMapping("/clientes")
     public ResponseEntity<?> create(@Valid @RequestBody Cliente cliente, BindingResult result) {
 
@@ -103,6 +106,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
+    @Secured("ROLE_ADMIN")
     @PutMapping("/clientes/{id}")
     public ResponseEntity<?> update(@Valid @RequestBody Cliente cliente, BindingResult result, @PathVariable Long id) {
 
@@ -151,6 +155,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/clientes/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
 
@@ -174,6 +179,7 @@ public class ClienteController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PostMapping("/clientes/upload")
     public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id){
         Map<String, Object> response = new HashMap<>();
@@ -185,7 +191,7 @@ public class ClienteController {
             String nombreArchivo = null;
             try {
                 nombreArchivo = uploadService.copiar(archivo);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 response.put("mensaje", "Error al subir la imagen del cliente");
                 response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -224,6 +230,7 @@ public class ClienteController {
         return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
     }
 
+    @Secured("ROLE_ADMIN")
     @GetMapping("/clientes/regiones")
     public List<Region> listarRegiones(){
         return clienteService.findAllRegiones();
