@@ -12,8 +12,9 @@ import swal from 'sweetalert2';
 export class FormComponent implements OnInit {
 
   public cliente: Cliente = new Cliente();
-  titulo: string = "Crear Cliente";
   regiones: Region[];
+  titulo: string = "Crear Cliente";
+
   errores: string[];
 
   constructor(private clienteService: ClienteService,
@@ -32,6 +33,7 @@ export class FormComponent implements OnInit {
   }
 
   create(): void {
+    console.log(this.cliente);
     this.clienteService.create(this.cliente)
       .subscribe(
         cliente => {
@@ -47,6 +49,7 @@ export class FormComponent implements OnInit {
   }
 
   update(): void {
+    console.log(this.cliente);
     this.clienteService.update(this.cliente)
       .subscribe(
         json => {
